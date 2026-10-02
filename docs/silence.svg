@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="300" viewBox="0 0 1000 300" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">
+<rect width="1000" height="300" fill="#0d1117"/>
+<text x="56" y="42" fill="#e6edf3" font-size="20" font-weight="700">17 phone calls. No AI in any of them.</text>
+<text x="56" y="66" fill="#7d8590" font-size="13">Time from the caller answering to hearing the first sound. No speech to text, no model, no text to speech.</text>
+<line x1="56" y1="210" x2="944" y2="210" stroke="#161b22" stroke-width="2"/>
+<line x1="56" y1="210" x2="56" y2="216" stroke="#7d8590"/>
+<text x="56" y="234" fill="#7d8590" font-size="11" text-anchor="middle">0ms</text>
+<line x1="167" y1="210" x2="167" y2="216" stroke="#7d8590"/>
+<text x="167" y="234" fill="#7d8590" font-size="11" text-anchor="middle">200ms</text>
+<line x1="278" y1="210" x2="278" y2="216" stroke="#7d8590"/>
+<text x="278" y="234" fill="#7d8590" font-size="11" text-anchor="middle">400ms</text>
+<line x1="389" y1="210" x2="389" y2="216" stroke="#7d8590"/>
+<text x="389" y="234" fill="#7d8590" font-size="11" text-anchor="middle">600ms</text>
+<line x1="500" y1="210" x2="500" y2="216" stroke="#7d8590"/>
+<text x="500" y="234" fill="#7d8590" font-size="11" text-anchor="middle">800ms</text>
+<line x1="611" y1="210" x2="611" y2="216" stroke="#7d8590"/>
+<text x="611" y="234" fill="#7d8590" font-size="11" text-anchor="middle">1000ms</text>
+<line x1="722" y1="210" x2="722" y2="216" stroke="#7d8590"/>
+<text x="722" y="234" fill="#7d8590" font-size="11" text-anchor="middle">1200ms</text>
+<line x1="833" y1="210" x2="833" y2="216" stroke="#7d8590"/>
+<text x="833" y="234" fill="#7d8590" font-size="11" text-anchor="middle">1400ms</text>
+<line x1="944" y1="210" x2="944" y2="216" stroke="#7d8590"/>
+<text x="944" y="234" fill="#7d8590" font-size="11" text-anchor="middle">1600ms</text>
+<line x1="334" y1="104" x2="334" y2="210" stroke="#d29922" stroke-dasharray="4 4"/>
+<text x="326" y="118" fill="#d29922" font-size="12" text-anchor="end">half a second</text>
+<circle cx="356" cy="196" r="6.5" fill="#3fb950" opacity="0.9"/>
+<circle cx="400" cy="196" r="6.5" fill="#3fb950" opacity="0.9"/>
+<circle cx="411" cy="179" r="6.5" fill="#3fb950" opacity="0.9"/>
+<circle cx="411" cy="162" r="6.5" fill="#3fb950" opacity="0.9"/>
+<circle cx="411" cy="145" r="6.5" fill="#3fb950" opacity="0.9"/>
+<circle cx="411" cy="128" r="6.5" fill="#3fb950" opacity="0.9"/>
+<circle cx="422" cy="111" r="6.5" fill="#3fb950" opacity="0.9"/>
+<circle cx="456" cy="196" r="6.5" fill="#3fb950" opacity="0.9"/>
+<circle cx="478" cy="196" r="6.5" fill="#3fb950" opacity="0.9"/>
+<circle cx="489" cy="196" r="6.5" fill="#3fb950" opacity="0.9"/>
+<circle cx="567" cy="196" r="6.5" fill="#3fb950" opacity="0.9"/>
+<circle cx="600" cy="196" r="6.5" fill="#3fb950" opacity="0.9"/>
+<circle cx="611" cy="196" r="6.5" fill="#3fb950" opacity="0.9"/>
+<circle cx="655" cy="196" r="6.5" fill="#3fb950" opacity="0.9"/>
+<circle cx="689" cy="196" r="6.5" fill="#3fb950" opacity="0.9"/>
+<circle cx="755" cy="196" r="6.5" fill="#3fb950" opacity="0.9"/>
+<circle cx="888" cy="196" r="6.5" fill="#3fb950" opacity="0.9"/>
+<line x1="478" y1="104" x2="478" y2="210" stroke="#e6edf3" stroke-width="1.5"/>
+<text x="478" y="98" fill="#e6edf3" font-size="13" font-weight="700" text-anchor="middle">median 760ms</text>
+<line x1="56" y1="256" x2="944" y2="256" stroke="#161b22"/>
+<text x="56" y="280" fill="#7d8590" font-size="12">every call was over half a second. range 540 to 1500ms</text>
+<text x="944" y="280" fill="#7d8590" font-size="12" text-anchor="end">npx dialtrace</text>
+</svg>
