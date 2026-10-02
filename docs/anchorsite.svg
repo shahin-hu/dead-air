@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="386" viewBox="0 0 1000 386" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">
+<rect width="1000" height="386" fill="#0d1117"/>
+<text x="56" y="42" fill="#e6edf3" font-size="20" font-weight="700">One dropdown cost 390ms on the same phone call</text>
+<text x="56" y="66" fill="#7d8590" font-size="13">Same caller, same number, same everything. Only the media anchor moved. 16 calls, 4 per city.</text>
+<text x="56" y="117" fill="#e6edf3" font-size="13">Ashburn, VA</text>
+<line x1="497" y1="112" x2="548" y2="112" stroke="#161b22" stroke-width="3"/>
+<circle cx="497" cy="112" r="6" fill="#3fb950" opacity="0.9"/>
+<circle cx="497" cy="99" r="6" fill="#3fb950" opacity="0.9"/>
+<circle cx="506" cy="112" r="6" fill="#3fb950" opacity="0.9"/>
+<circle cx="548" cy="112" r="6" fill="#3fb950" opacity="0.9"/>
+<line x1="501" y1="99" x2="501" y2="125" stroke="#e6edf3" stroke-width="2"/>
+<text x="944" y="117" fill="#e6edf3" font-size="13" font-weight="700" text-anchor="end">650ms</text>
+<text x="56" y="169" fill="#e6edf3" font-size="13">Amsterdam, NL</text>
+<line x1="455" y1="164" x2="557" y2="164" stroke="#161b22" stroke-width="3"/>
+<circle cx="455" cy="164" r="6" fill="#3fb950" opacity="0.9"/>
+<circle cx="489" cy="164" r="6" fill="#3fb950" opacity="0.9"/>
+<circle cx="531" cy="164" r="6" fill="#3fb950" opacity="0.9"/>
+<circle cx="557" cy="164" r="6" fill="#3fb950" opacity="0.9"/>
+<line x1="510" y1="151" x2="510" y2="177" stroke="#e6edf3" stroke-width="2"/>
+<text x="944" y="169" fill="#e6edf3" font-size="13" font-weight="700" text-anchor="end">670ms</text>
+<text x="56" y="221" fill="#e6edf3" font-size="13">San Jose, CA</text>
+<line x1="497" y1="216" x2="760" y2="216" stroke="#161b22" stroke-width="3"/>
+<circle cx="497" cy="216" r="6" fill="#f85149" opacity="0.9"/>
+<circle cx="641" cy="216" r="6" fill="#f85149" opacity="0.9"/>
+<circle cx="709" cy="216" r="6" fill="#f85149" opacity="0.9"/>
+<circle cx="760" cy="216" r="6" fill="#f85149" opacity="0.9"/>
+<line x1="675" y1="203" x2="675" y2="229" stroke="#e6edf3" stroke-width="2"/>
+<text x="944" y="221" fill="#e6edf3" font-size="13" font-weight="700" text-anchor="end">1060ms</text>
+<text x="56" y="273" fill="#e6edf3" font-size="13">Sydney, AU</text>
+<line x1="616" y1="268" x2="862" y2="268" stroke="#161b22" stroke-width="3"/>
+<circle cx="616" cy="268" r="6" fill="#f85149" opacity="0.9"/>
+<circle cx="650" cy="268" r="6" fill="#f85149" opacity="0.9"/>
+<circle cx="684" cy="268" r="6" fill="#f85149" opacity="0.9"/>
+<circle cx="862" cy="268" r="6" fill="#f85149" opacity="0.9"/>
+<line x1="667" y1="255" x2="667" y2="281" stroke="#e6edf3" stroke-width="2"/>
+<text x="944" y="273" fill="#e6edf3" font-size="13" font-weight="700" text-anchor="end">1040ms</text>
+<line x1="226" y1="302" x2="904" y2="302" stroke="#161b22"/>
+<text x="226" y="322" fill="#7d8590" font-size="11" text-anchor="middle">0ms</text>
+<text x="396" y="322" fill="#7d8590" font-size="11" text-anchor="middle">400ms</text>
+<text x="565" y="322" fill="#7d8590" font-size="11" text-anchor="middle">800ms</text>
+<text x="734" y="322" fill="#7d8590" font-size="11" text-anchor="middle">1200ms</text>
+<text x="904" y="322" fill="#7d8590" font-size="11" text-anchor="middle">1600ms</text>
+<text x="56" y="366" fill="#7d8590" font-size="12">bar = median. 7 of 8 slow-city calls beat every fast-city call. permutation test p = 0.012</text>
+<text x="944" y="366" fill="#7d8590" font-size="12" text-anchor="end">npx dialtrace</text>
+</svg>
