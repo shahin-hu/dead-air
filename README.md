@@ -136,6 +136,20 @@ reach your machine, tunnel included. It does not affect the call timeline, which
 comes from carrier timestamps. It is printed so you can see what your tunnel
 costs you if you are reacting to webhooks in real time.
 
+## Why there is no webhook signature check
+
+Telnyx signs webhooks with `telnyx-signature-ed25519`, and anything that acts on
+a webhook should verify it. This tool does not act on webhooks, it timestamps
+them, and it listens on a throwaway tunnel for the length of one call.
+
+The real reason is that verification would sit on the response path, and a slow
+reply turns into a Telnyx retry, which would show up as a duplicate event on your
+timeline. The handler answers 200 first and does everything else afterwards.
+
+If you point it at a long lived public URL instead of a per-run tunnel, that
+tradeoff stops being free. Anyone who can reach the port can post events into
+your run. Use a fresh tunnel per run, which is the default.
+
 ## No `call.ringing` event?
 
 Post-dial delay comes from `call.ringing`, which is off by default on some Call
