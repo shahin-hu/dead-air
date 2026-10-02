@@ -1,0 +1,20 @@
+{
+  "name": "dead-air",
+  "version": "0.1.0",
+  "description": "Measure the silence in your voice AI phone calls. Zero dependencies.",
+  "keywords": ["voice-ai", "latency", "telephony", "sip", "telnyx", "benchmark", "webrtc", "post-dial-delay"],
+  "license": "MIT",
+  "type": "module",
+  "bin": { "deadair": "dist/cli.js" },
+  "files": ["dist", "README.md", "LICENSE"],
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "build": "tsc -b",
+    "dev": "tsc -b --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}
