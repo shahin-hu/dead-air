@@ -31,10 +31,18 @@ export const EVENTS: Record<string, EventSpec> = {
     phase: 'setup',
     note: 'Telnyx created the call leg and started signalling out.',
   },
+  // TeXML only. The Call Control API has no ringing event: an outbound call
+  // goes call.initiated -> call.answered with nothing in between. Kept here so
+  // a TeXML status callback lands in the right place if you feed one in.
   'call.ringing': {
     label: 'call.ringing',
     phase: 'setup',
     note: 'Post-dial delay. Time for the far carrier to start ringing the phone.',
+  },
+  'call.cost': {
+    label: 'call.cost',
+    phase: 'teardown',
+    note: 'What the call actually cost. Needs call_cost_in_webhooks on the app.',
   },
   'call.answered': {
     label: 'call.answered',

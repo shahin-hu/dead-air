@@ -95,7 +95,6 @@ function demoRun(): Run {
     { kind: 'local', eventType: 'dial.requested', receivedAt: t0 },
     { kind: 'local', eventType: 'dial.accepted', receivedAt: t0 + 118 },
     { kind: 'webhook', eventType: 'call.initiated', occurredAt: at(121), receivedAt: t0 + 164 },
-    { kind: 'webhook', eventType: 'call.ringing', occurredAt: at(462), receivedAt: t0 + 509 },
     { kind: 'webhook', eventType: 'call.answered', occurredAt: at(3910), receivedAt: t0 + 3952 },
     { kind: 'webhook', eventType: 'streaming.started', occurredAt: at(4024), receivedAt: t0 + 4071 },
     { kind: 'mark', eventType: 'mark:stt.first_partial', receivedAt: t0 + 4610 },

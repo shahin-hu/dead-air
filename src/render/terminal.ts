@@ -78,6 +78,8 @@ export function renderWaterfall(
     const marker = point.kind === 'mark' ? paint(' ·', C.yellow) : '';
     let suffix = '';
     if (point.eventType === 'call.ringing') suffix = paint('  ← post-dial delay', C.dim);
+    if (point.eventType === 'call.answered' && metrics.postDialDelay === null)
+      suffix = paint('  ← setup and ring, not separable here', C.dim);
     if (metrics.firstAudioAt !== null && point.at === metrics.firstAudioAt && !suffix) {
       suffix = paint('  ← caller hears you', C.dim);
       highlighted = point.note;
@@ -94,7 +96,7 @@ export function renderWaterfall(
       const share = seg.yours ? seg.ms / fixableTotal : 0;
       const blocks = seg.yours ? '█'.repeat(Math.max(1, Math.round(share * 28))) : '';
       const pct = seg.yours ? padLeft(`${Math.round(share * 100)}%`, 4) : padLeft('—', 4);
-      const note = seg.yours ? '' : paint('  not latency, a person picking up', C.dim);
+      const note = seg.yours ? '' : paint(`  ${seg.why ?? ''}`, C.dim);
       lines.push(
         `    ${pad(seg.name, 16)}${padLeft(ms(seg.ms), 9)}  ${pct}  ${paint(blocks, C.green)}${note}`,
       );
@@ -135,6 +137,14 @@ export function renderWaterfall(
       const tone = q.mos !== null && q.mos < 3.6 ? C.yellow : C.green;
       lines.push(`    ${pad(q.direction, 16)}${paint(bits.join('   '), tone)}`);
     }
+    if (outcome.cost && outcome.cost.totalCost !== null) {
+      const { totalCost, currency, billedDurationSecs, parts } = outcome.cost;
+      const breakdown = parts.map((p) => `${p.part} ${p.cost}`).join(' + ');
+      const billed = billedDurationSecs !== null ? ` over ${billedDurationSecs}s` : '';
+      lines.push(
+        `    ${pad('cost', 16)}${paint(`${totalCost.toFixed(4)} ${currency}`, C.bold)}${paint(`${billed}${breakdown ? `   ${breakdown}` : ''}`, C.dim)}`,
+      );
+    }
     if (outcome.hangupCause) {
       const cause = [outcome.hangupCause, outcome.hangupSource, outcome.sipHangupCause]
         .filter((part): part is string => part !== null && part !== 'unspecified')
@@ -147,7 +157,7 @@ export function renderWaterfall(
     lines.push('');
     lines.push(
       paint(
-        '  No call.ringing event. Turn on early media events in your Call Control App\n  to measure post-dial delay.',
+        '  No ringing event, so signalling and ring time cannot be told apart.\n  The Call Control API does not emit one. TeXML status callbacks do.',
         C.dim,
       ),
     );

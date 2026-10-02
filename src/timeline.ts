@@ -62,7 +62,7 @@ export interface Point {
 }
 
 export interface Metrics {
-  /** Dial sent until the far side starts ringing. Null if ringing is off. */
+  /** Initiated to ringing. Null on Call Control, which has no ringing event. */
   postDialDelay: number | null;
   /** Ringing until answer. Human or machine reaction time, not ours. */
   ringDuration: number | null;
@@ -183,6 +183,8 @@ export function computeMetrics(points: Point[]): Metrics {
 
 export interface Segment {
   name: string;
+  /** Why this segment is excluded from the percentages. */
+  why?: string;
   from: string;
   to: string;
   ms: number;
@@ -216,12 +218,28 @@ export function segments(points: Point[]): Segment[] {
     yours: boolean,
   ) => {
     if (a === null || b === null || b < a) return;
-    out.push({ name, from, to, ms: b - a, yours });
+    const segment: Segment = { name, from, to, ms: b - a, yours };
+    if (!yours) {
+      segment.why =
+        name === 'ring'
+          ? 'a person reaching for the phone, not latency'
+          : 'signalling plus a person picking up, not separable';
+    }
+    out.push(segment);
   };
 
   push('api round trip', 'dial', 'initiated', 0, initiated, true);
-  push('post-dial delay', 'initiated', 'ringing', initiated, ringing, true);
-  push('ring', 'ringing', 'answered', ringing, answered, false);
+  if (ringing !== null) {
+    // Only TeXML gives us a ringing callback, and only then can post-dial delay
+    // be told apart from the time a human spent reaching for the phone.
+    push('post-dial delay', 'initiated', 'ringing', initiated, ringing, true);
+    push('ring', 'ringing', 'answered', ringing, answered, false);
+  } else {
+    // Call Control gives initiated then answered and nothing between. Signalling
+    // and ring time are one number here. Reporting it as latency would be a lie,
+    // so it is excluded from the percentages like ring time is.
+    push('setup and ring', 'initiated', 'answered', initiated, answered, false);
+  }
   push('media path', 'answered', 'audio in', answered, audioIn, true);
   push('your pipeline', 'audio in', 'audio out', audioIn, firstAudio, true);
 
@@ -250,11 +268,19 @@ export interface DirectionQuality {
   lossPct: number | null;
 }
 
+export interface CallCost {
+  totalCost: number | null;
+  currency: string;
+  billedDurationSecs: number | null;
+  parts: Array<{ part: string; rate: string | null; cost: string | null }>;
+}
+
 export interface CallOutcome {
   hangupCause: string | null;
   hangupSource: string | null;
   sipHangupCause: string | null;
   quality: DirectionQuality[];
+  cost: CallCost | null;
 }
 
 function num(value: unknown): number | null {
@@ -295,7 +321,35 @@ export function extractOutcome(events: RawEvent[]): CallOutcome | null {
     });
   }
 
+  // call.cost only arrives when call_cost_in_webhooks is on for the app, and
+  // it lands after call.hangup, so it may be missing on a short capture.
+  const costEvent = events.find((e) => e.eventType === 'call.cost');
+  let cost: CallCost | null = null;
+  if (costEvent) {
+    const cp = (costEvent.payload ?? {}) as Record<string, unknown>;
+    const rawParts = Array.isArray(cp['cost_parts']) ? (cp['cost_parts'] as unknown[]) : [];
+    const parts = rawParts.map((entry) => {
+      const part = (entry ?? {}) as Record<string, unknown>;
+      return {
+        part: str(part['call_part']) ?? 'unknown',
+        rate: str(part['rate']),
+        cost: str(part['cost']),
+      };
+    });
+    const currency =
+      parts.length > 0
+        ? str((rawParts[0] as Record<string, unknown>)['currency']) ?? 'USD'
+        : 'USD';
+    cost = {
+      totalCost: num(cp['total_cost']),
+      currency,
+      billedDurationSecs: num(cp['billed_duration_secs']),
+      parts,
+    };
+  }
+
   return {
+    cost,
     hangupCause: str(payload['hangup_cause']),
     hangupSource: str(payload['hangup_source']),
     sipHangupCause: str(payload['sip_hangup_cause']),

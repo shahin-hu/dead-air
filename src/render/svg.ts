@@ -128,7 +128,7 @@ export function renderSvg(
         );
       } else {
         out.push(
-          `<text x="${PAD + SEG_BAR_X}" y="${y + 4}" fill="${INK.teardown}" font-size="12">a person reaching for the phone, not latency</text>`,
+          `<text x="${PAD + SEG_BAR_X}" y="${y + 4}" fill="${INK.teardown}" font-size="12">${esc(seg.why ?? "")}</text>`,
         );
       }
       y += 26;

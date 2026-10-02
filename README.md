@@ -17,13 +17,12 @@ npx dead-air demo
 ```
 
 ```
-  dead-air +31201234567 2026-10-02T10:45:14.384Z
+  dead-air +31201234567 2026-10-02T10:53:18.249Z
 
   dial sent          ├─        0ms
   dial accepted      ├─      118ms
   call.initiated     ├─      121ms
-  call.ringing       ├────      462ms  ← post-dial delay
-  call.answered      ├─────────────────────────────────    3,910ms
+  call.answered      ├─────────────────────────────────    3,910ms  ← setup and ring, not separable here
   streaming.started  ├──────────────────────────────────    4,024ms
   stt.first_partial  ├───────────────────────────────────────    4,610ms ·
   llm.done           ├────────────────────────────────────────────    5,180ms ·
@@ -31,22 +30,23 @@ npx dead-air demo
   call.hangup        ├──────────────────────────────────────────────»    9,980ms
 
   Where the time went
-    api round trip      121ms    6%  ██
-    post-dial delay     341ms   17%  █████
-    ring              3,448ms     —    not latency, a person picking up
-    media path          114ms    6%  ██
-    your pipeline     1,378ms   71%  ████████████████████
+    api round trip      121ms    8%  ██
+    setup and ring    3,789ms     —    not latency, a person picking up
+    media path          114ms    7%  ██
+    your pipeline     1,378ms   85%  ████████████████████████
 
-  Post-dial delay         341ms
   Answer to first audio   1,492ms
   Call duration           9,980ms
-  Webhook delivery lag    46ms median
+  Webhook delivery lag    44ms median
   Clock skew              -12ms ±59ms
 
   Line quality from call_quality_stats on the hangup webhook
     inbound         MOS 4.21   loss 1.43%   jitter var 2.74   491 pkts
     outbound        MOS 4.48   loss 0.20%   503 pkts
     ended           normal_clearing · caller · 200
+
+  No ringing event, so signalling and ring time cannot be told apart.
+  The Call Control API does not emit one. TeXML status callbacks do.
 
   First audio out. This is the moment the caller stops hearing silence.
 ```
@@ -165,11 +165,24 @@ If you point it at a long lived public URL instead of a per-run tunnel, that
 tradeoff stops being free. Anyone who can reach the port can post events into
 your run. Use a fresh tunnel per run, which is the default.
 
-## No `call.ringing` event?
+## Post-dial delay, and why you probably cannot see it
 
-Post-dial delay comes from `call.ringing`, which is off by default on some Call
-Control Apps. Turn on early media events in the app settings. Without it the
-waterfall still works, it just starts at `call.answered`.
+Post-dial delay is the gap between your carrier sending the INVITE and the far
+network starting to ring the phone. It is the number that tells you whether a
+slow connect is the network or the callee.
+
+**The Call Control API does not emit a ringing event.** An outbound call goes
+`call.initiated`, then `call.answered`, with nothing in between. So signalling
+time and the seconds a human spent reaching for their phone arrive as one
+number, and nothing can separate them. I checked the OpenAPI spec rather than
+the docs: the only `ringing` callbacks Telnyx defines are TeXML ones.
+
+This tool does not guess at the split. It reports `setup and ring` as a single
+block and leaves it out of the percentages, the same way ring time is left out.
+
+If you need the split, drive the call with TeXML and point its status callbacks
+here. `initiated`, `ringing`, `answered` and `completed` all arrive there, and
+the waterfall splits automatically when a ringing event shows up.
 
 ## Flags
 
