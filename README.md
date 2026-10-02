@@ -15,6 +15,8 @@ all**, the caller waited **640ms** after picking up before hearing a single
 syllable. That is most of a sub-second budget, spent before a model is asked
 anything.
 
+![A dead-air waterfall of a real call](docs/real-call.png)
+
 Zero dependencies. One command.
 
 ```
