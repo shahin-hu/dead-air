@@ -2,12 +2,38 @@
   "name": "dead-air",
   "version": "0.1.0",
   "description": "Measure the silence in your voice AI phone calls. Zero dependencies.",
-  "keywords": ["voice-ai", "latency", "telephony", "sip", "telnyx", "benchmark", "webrtc", "post-dial-delay"],
+  "keywords": [
+    "voice-ai",
+    "latency",
+    "telephony",
+    "sip",
+    "telnyx",
+    "benchmark",
+    "webrtc",
+    "post-dial-delay"
+  ],
+  "homepage": "https://github.com/shahin-hu/dead-air#readme",
+  "bugs": {
+    "url": "https://github.com/shahin-hu/dead-air/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shahin-hu/dead-air.git"
+  },
   "license": "MIT",
+  "author": "Shahin Huseyngulu",
   "type": "module",
-  "bin": { "deadair": "dist/cli.js" },
-  "files": ["dist", "README.md", "LICENSE"],
-  "engines": { "node": ">=20" },
+  "bin": {
+    "deadair": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "build": "tsc -b",
     "dev": "tsc -b --watch",
