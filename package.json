@@ -1,5 +1,5 @@
 {
-  "name": "dead-air",
+  "name": "dialtrace",
   "version": "0.1.0",
   "description": "Measure the silence in your voice AI phone calls. Zero dependencies.",
   "keywords": [
@@ -12,19 +12,19 @@
     "webrtc",
     "post-dial-delay"
   ],
-  "homepage": "https://github.com/shahin-hu/dead-air#readme",
+  "homepage": "https://github.com/shahin-hu/dialtrace#readme",
   "bugs": {
-    "url": "https://github.com/shahin-hu/dead-air/issues"
+    "url": "https://github.com/shahin-hu/dialtrace/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shahin-hu/dead-air.git"
+    "url": "git+https://github.com/shahin-hu/dialtrace.git"
   },
   "license": "MIT",
   "author": "Shahin Huseyngulu",
   "type": "module",
   "bin": {
-    "deadair": "dist/cli.js"
+    "dialtrace": "dist/cli.js"
   },
   "files": [
     "dist",

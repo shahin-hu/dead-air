@@ -18,11 +18,11 @@ import {
 } from './timeline.js';
 
 const HELP = `
-dead-air  ·  measure the silence in your voice AI phone calls
+dialtrace  ·  measure the silence in your voice AI phone calls
 
-  npx dead-air demo                       see the output, no account needed
-  npx dead-air call --to +31201234567     place a real call and measure it
-  npx dead-air replay runs/last.json      re-render a saved run
+  npx dialtrace demo                       see the output, no account needed
+  npx dialtrace call --to +31201234567     place a real call and measure it
+  npx dialtrace replay runs/last.json      re-render a saved run
 
 Options for "call"
   --to <e164>             number to call                      (required)
@@ -157,9 +157,9 @@ async function runCall(flags: Flags): Promise<number> {
     'TELNYX_CONNECTION_ID',
     'Call Control App id',
   );
-  const to = required(flags.to, 'DEADAIR_TO', 'destination number (--to)');
-  const from = required(flags.from, 'DEADAIR_FROM', 'caller ID (--from)');
-  const port = Number(setting(flags.port, 'DEADAIR_PORT') ?? 8787);
+  const to = required(flags.to, 'DIALTRACE_TO', 'destination number (--to)');
+  const from = required(flags.from, 'DIALTRACE_FROM', 'caller ID (--from)');
+  const port = Number(setting(flags.port, 'DIALTRACE_PORT') ?? 8787);
   const waitSecs = Number(flags.wait ?? 8);
   const ringTimeout = Number(flags['ring-timeout'] ?? 30);
 
@@ -324,7 +324,7 @@ async function main(): Promise<number> {
   if (command === 'replay') {
     const path = positionals[1];
     if (!path) {
-      fail('replay needs a path, for example: deadair replay runs/last.json');
+      fail('replay needs a path, for example: dialtrace replay runs/last.json');
       return 1;
     }
     const saved = JSON.parse(readFileSync(path, 'utf8')) as { run: Run };

@@ -63,7 +63,7 @@ export function renderWaterfall(
   const to = run.call.to ?? 'unknown';
   lines.push('');
   lines.push(
-    `  ${paint('dead-air', C.bold)} ${paint(to, C.dim)} ${paint(new Date(run.t0).toISOString(), C.dim)}`,
+    `  ${paint('dialtrace', C.bold)} ${paint(to, C.dim)} ${paint(new Date(run.t0).toISOString(), C.dim)}`,
   );
   lines.push('');
 

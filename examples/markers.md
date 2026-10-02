@@ -1,6 +1,6 @@
 # Marking your pipeline
 
-`dead-air` can only draw what it is told about. Carrier webhooks give it the call.
+`dialtrace` can only draw what it is told about. Carrier webhooks give it the call.
 Your markers give it everything that happens between the caller speaking and the
 caller hearing a reply.
 
@@ -30,7 +30,7 @@ are measuring.
 ## Node
 
 ```js
-const MARK = process.env.DEADAIR_MARK_URL ?? 'http://localhost:8787/mark';
+const MARK = process.env.DIALTRACE_MARK_URL ?? 'http://localhost:8787/mark';
 
 export const mark = (label) =>
   void fetch(MARK, {

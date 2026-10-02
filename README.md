@@ -1,4 +1,4 @@
-# dead-air
+# dialtrace
 
 Measure the silence in your voice AI phone calls.
 
@@ -7,7 +7,7 @@ the model, and text to speech. None of them measure the phone call. So teams tun
 a 900ms pipeline down to 600ms and the caller still waits, because a third of the
 wait was never in the pipeline.
 
-`dead-air` puts the carrier events and your own pipeline stages on one timeline,
+`dialtrace` puts the carrier events and your own pipeline stages on one timeline,
 so you can see which part you are actually paying for.
 
 On a real call from a US number to a Dutch mobile, with **no AI in the path at
@@ -15,30 +15,32 @@ all**, the caller waited **640ms** after picking up before hearing a single
 syllable. That is most of a sub-second budget, spent before a model is asked
 anything.
 
-![A dead-air waterfall of a real call](docs/real-call.png)
+![A dialtrace waterfall of a real call](docs/real-call.png)
 
 Zero dependencies. One command.
 
 ```
-npx dead-air demo
+npx dialtrace demo
 ```
 
 ```
-  dead-air +31201234567 2026-10-02T10:53:18.249Z
+  dialtrace +31201234567 2026-10-02T13:38:35.027Z
 
   dial sent          ├─        0ms
-  dial accepted      ├─      118ms
-  call.initiated     ├─      121ms
-  call.answered      ├─────────────────────────────────    3,910ms  ← setup and ring, not separable here
-  streaming.started  ├──────────────────────────────────    4,024ms
-  stt.first_partial  ├───────────────────────────────────────    4,610ms ·
-  llm.done           ├────────────────────────────────────────────    5,180ms ·
-  speak.started      ├──────────────────────────────────────────────    5,402ms  ← caller hears you
-  call.hangup        ├──────────────────────────────────────────────»    9,980ms
+  dial accepted      ├───      118ms
+  call.initiated     ├───      121ms
+  call.answered      ├────╳─    3,910ms  ← setup and ring, not separable here
+  streaming.started  ├────╳────    4,024ms
+  stt.first_partial  ├────╳──────────────────    4,610ms ·
+  llm.done           ├────╳─────────────────────────────────    5,180ms ·
+  speak.started      ├────╳──────────────────────────────────────    5,402ms  ← caller hears you
+  call.hangup        ├────╳────────────────────────────────────────╳    9,980ms
+                     ╳ = 3,789ms of waiting, not drawn to scale
+                     ╳ = 4,578ms of waiting, not drawn to scale
 
   Where the time went
     api round trip      121ms    8%  ██
-    setup and ring    3,789ms     —    not latency, a person picking up
+    setup and ring    3,789ms     —    signalling plus a person picking up, not separable
     media path          114ms    7%  ██
     your pipeline     1,378ms   85%  ████████████████████████
 
@@ -66,7 +68,7 @@ You need a Telnyx API key, a Call Control App, and a number on your account.
 export TELNYX_API_KEY=KEY...
 export TELNYX_CONNECTION_ID=2345678901234567890
 
-npx dead-air call \
+npx dialtrace call \
   --to +31201234567 \
   --from +31208080808 \
   --say "testing one two three" \
@@ -78,7 +80,7 @@ PATH, one is made for you and torn down at the end. Otherwise pass
 `--webhook-url https://your-host` and point it at the local port yourself.
 
 The run is saved to `runs/last.json`. Re-render it any time with
-`npx dead-air replay runs/last.json`.
+`npx dialtrace replay runs/last.json`.
 
 ## Put your own pipeline on the timeline
 

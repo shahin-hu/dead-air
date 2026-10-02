@@ -84,7 +84,7 @@ export async function openTunnel(
       '',
       'Pick one:',
       '  brew install cloudflared     (then rerun, a tunnel is made for you)',
-      '  deadair call --webhook-url https://your-public-host  (bring your own)',
+      '  dialtrace call --webhook-url https://your-public-host  (bring your own)',
     ].join('\n'),
   );
 }

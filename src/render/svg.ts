@@ -75,7 +75,7 @@ export function renderSvg(
   out.push(`<rect width="${W}" height="${H}" fill="${INK.bg}"/>`);
 
   out.push(
-    `<text x="${PAD}" y="42" fill="${INK.text}" font-size="21" font-weight="700">dead-air</text>`,
+    `<text x="${PAD}" y="42" fill="${INK.text}" font-size="21" font-weight="700">dialtrace</text>`,
   );
   out.push(
     `<text x="${PAD + 128}" y="42" fill="${INK.dim}" font-size="14">${esc(showNumber ? (run.call.to ?? '') : maskNumber(run.call.to ?? ''))}</text>`,
@@ -185,7 +185,7 @@ export function renderSvg(
     `<text x="${PAD}" y="${H - 20}" fill="${INK.dim}" font-size="12">${esc(footer)}</text>`,
   );
   out.push(
-    `<text x="${W - PAD}" y="${H - 20}" fill="${INK.teardown}" font-size="12" text-anchor="end">npx dead-air</text>`,
+    `<text x="${W - PAD}" y="${H - 20}" fill="${INK.teardown}" font-size="12" text-anchor="end">npx dialtrace</text>`,
   );
   out.push('</svg>');
   return out.join('\n');
