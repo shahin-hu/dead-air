@@ -10,6 +10,11 @@ wait was never in the pipeline.
 `dead-air` puts the carrier events and your own pipeline stages on one timeline,
 so you can see which part you are actually paying for.
 
+On a real call from a US number to a Dutch mobile, with **no AI in the path at
+all**, the caller waited **640ms** after picking up before hearing a single
+syllable. That is most of a sub-second budget, spent before a model is asked
+anything.
+
 Zero dependencies. One command.
 
 ```

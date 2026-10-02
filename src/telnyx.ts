@@ -92,3 +92,44 @@ export async function hangup(apiKey: string, callControlId: string): Promise<voi
     // The call may already be gone. That is not a failure of the run.
   }
 }
+
+/**
+ * The per-call `webhook_url` only redirects *subsequent* webhooks, which is
+ * exactly what the API reference says if you read it twice. `call.initiated` is
+ * not subsequent: it goes to whatever the Call Control App is configured with.
+ *
+ * So without pointing the app at the receiver too, the first event you ever see
+ * is `call.answered`, there is no anchor for the clock offset, and the API round
+ * trip cannot be separated from call setup.
+ */
+export async function getApp(
+  apiKey: string,
+  id: string,
+): Promise<{ name: string; webhookUrl: string | null }> {
+  const res = await fetch(`${API}/call_control_applications/${encodeURIComponent(id)}`, {
+    headers: { Authorization: `Bearer ${apiKey}` },
+  });
+  if (!res.ok) throw new Error(`Could not read Call Control App ${id}: ${res.status}`);
+  const parsed = (await res.json()) as { data?: Record<string, unknown> };
+  return {
+    name: String(parsed.data?.['application_name'] ?? ''),
+    webhookUrl: (parsed.data?.['webhook_event_url'] as string | null) ?? null,
+  };
+}
+
+export async function setAppWebhook(
+  apiKey: string,
+  id: string,
+  name: string,
+  webhookUrl: string | null,
+): Promise<void> {
+  const res = await fetch(`${API}/call_control_applications/${encodeURIComponent(id)}`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    // application_name is required on PATCH even when it is not changing.
+    body: JSON.stringify({ application_name: name, webhook_event_url: webhookUrl }),
+  });
+  if (!res.ok) {
+    throw new Error(`Could not update Call Control App ${id}: ${res.status} ${await res.text()}`);
+  }
+}

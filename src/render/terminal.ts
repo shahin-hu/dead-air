@@ -1,4 +1,5 @@
 import type { CallOutcome, Metrics, Point, Run, Segment } from '../timeline.js';
+import { buildAxis } from './axis.js';
 
 const useColor =
   process.stdout.isTTY === true && !process.env['NO_COLOR'] && process.env['TERM'] !== 'dumb';
@@ -56,7 +57,7 @@ export function renderWaterfall(
   const barWidth = Math.max(20, Math.min(46, (process.stdout.columns ?? 100) - 54));
   // Scale to the moment the caller hears us, not to hangup. Call duration is
   // arbitrary and would squash every number worth reading into the first inch.
-  const scaleMax = scaleTo(points);
+  const axis = buildAxis(points);
   const labelWidth = Math.max(16, ...points.map((p) => p.label.length)) + 2;
 
   const to = run.call.to ?? 'unknown';
@@ -68,13 +69,15 @@ export function renderWaterfall(
 
   let highlighted: string | undefined;
   for (const point of points) {
-    const overflow = point.at > scaleMax;
-    const filled = overflow
-      ? barWidth
-      : Math.max(1, Math.round((point.at / scaleMax) * barWidth));
-    const bar =
-      paint('─'.repeat(filled), PHASE_COLOR[point.phase] ?? '') +
-      (overflow ? paint('»', C.grey) : '');
+    const filled = Math.max(1, Math.round(axis.pos(point.at) * barWidth));
+    // Mark where the axis was compressed, inside every bar that spans it, so a
+    // long bar never reads as a long wait.
+    const cells = Array.from({ length: filled }, () => '─');
+    for (const brk of axis.breaks) {
+      const index = Math.round(brk.pos * barWidth);
+      if (index < filled) cells[index] = '╳';
+    }
+    const bar = paint(cells.join(''), PHASE_COLOR[point.phase] ?? '');
     const marker = point.kind === 'mark' ? paint(' ·', C.yellow) : '';
     let suffix = '';
     if (point.eventType === 'call.ringing') suffix = paint('  ← post-dial delay', C.dim);
@@ -85,6 +88,15 @@ export function renderWaterfall(
       highlighted = point.note;
     }
     lines.push(`  ${pad(point.label, labelWidth)}├${bar} ${padLeft(ms(point.at), 10)}${marker}${suffix}`);
+  }
+
+  for (const brk of axis.breaks) {
+    lines.push(
+      paint(
+        `  ${' '.repeat(labelWidth)}╳ = ${ms(brk.ms)} of waiting, not drawn to scale`,
+        C.dim,
+      ),
+    );
   }
 
   lines.push('');

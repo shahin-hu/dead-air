@@ -1,5 +1,5 @@
 import type { Metrics, Point, Run, Segment } from '../timeline.js';
-import { scaleTo } from './terminal.js';
+import { buildAxis } from './axis.js';
 import type { CallOutcome } from '../timeline.js';
 
 /**
@@ -47,7 +47,7 @@ export function renderSvg(
   outcome: CallOutcome | null = null,
 ): string {
   const barMax = W - PAD * 2 - LABEL_W - TIME_W;
-  const scaleMax = scaleTo(points);
+  const axis = buildAxis(points);
   const headerH = 78;
   const waterfallH = points.length * ROW + 16;
   const segH = segs.length > 0 ? segs.length * 26 + 46 : 0;
@@ -79,10 +79,24 @@ export function renderSvg(
 
   let y = headerH + 8;
   const barX = PAD + LABEL_W;
+  const waterfallTop = y - 12;
+  const waterfallBottom = y + points.length * ROW - 14;
+  for (const brk of axis.breaks) {
+    const x = barX + Math.round(brk.pos * barMax);
+    out.push(
+      `<line x1="${x}" y1="${waterfallTop}" x2="${x}" y2="${waterfallBottom}" stroke="${INK.bg}" stroke-width="7"/>`,
+    );
+    out.push(
+      `<line x1="${x}" y1="${waterfallTop}" x2="${x}" y2="${waterfallBottom}" stroke="${INK.teardown}" stroke-width="1" stroke-dasharray="3 4"/>`,
+    );
+    out.push(
+      `<text x="${x + 6}" y="${waterfallBottom + 10}" fill="${INK.teardown}" font-size="11">${esc(ms(brk.ms))} waiting, not to scale</text>`,
+    );
+  }
   for (const point of points) {
     const colour = (INK as Record<string, string>)[point.phase] ?? INK.other;
-    const overflow = point.at > scaleMax;
-    const width = overflow ? barMax : Math.max(2, Math.round((point.at / scaleMax) * barMax));
+    const width = Math.max(2, Math.round(axis.pos(point.at) * barMax));
+    const overflow = false;
     out.push(
       `<text x="${PAD}" y="${y + 4}" fill="${INK.dim}" font-size="13">${esc(point.label)}</text>`,
     );
@@ -142,6 +156,9 @@ export function renderSvg(
   const footer = [
     metrics.postDialDelay !== null ? `post-dial ${ms(metrics.postDialDelay)}` : null,
     mosBits || null,
+    outcome?.cost?.totalCost != null
+      ? `cost ${outcome.cost.totalCost.toFixed(4)} ${outcome.cost.currency}`
+      : null,
     metrics.medianDeliveryLag !== null ? `webhook lag ${ms(metrics.medianDeliveryLag)}` : null,
     `clock skew ${ms(run.skewMs)} ±${ms(run.skewUncertaintyMs)}`,
   ]

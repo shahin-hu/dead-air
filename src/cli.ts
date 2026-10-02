@@ -5,7 +5,7 @@ import { maskKey, required, setting } from './config.js';
 import { renderSvg } from './render/svg.js';
 import { fail, note, renderWaterfall } from './render/terminal.js';
 import { startReceiver } from './server.js';
-import { dial, hangup, speak } from './telnyx.js';
+import { dial, getApp, hangup, setAppWebhook, speak } from './telnyx.js';
 import { openTunnel } from './tunnel.js';
 import {
   buildPoints,
@@ -34,6 +34,10 @@ Options for "call"
   --say "<text>"          speak this on answer, to mark first audio out
   --wait <secs>           hang up this long after answer       (default 8)
   --ring-timeout <secs>   give up if nobody answers            (default 30)
+  --sync-app-webhook      point the Call Control App at this run too, and put it
+                          back afterwards. Needed for call.initiated, which the
+                          per-call webhook override does NOT redirect. Without
+                          it the first event you see is call.answered.
   --svg <path>            also write the waterfall as an SVG
   --json <path>           also write the raw run               (default runs/)
 
@@ -53,6 +57,7 @@ interface Flags {
   say?: string;
   wait?: string;
   'ring-timeout'?: string;
+  'sync-app-webhook'?: boolean;
   svg?: string;
   json?: string;
   help?: boolean;
@@ -153,6 +158,7 @@ async function runCall(flags: Flags): Promise<number> {
   const events: RawEvent[] = [];
   let callControlId = '';
   let answered = false;
+  let hangupGrace: NodeJS.Timeout | undefined;
   let finished: () => void = () => {};
   const done = new Promise<void>((resolve) => {
     finished = resolve;
@@ -174,13 +180,44 @@ async function runCall(flags: Flags): Promise<number> {
       }, waitSecs * 1000);
     }
     if (event.eventType === 'call.hangup') {
-      setTimeout(finished, 400);
+      // call.cost arrives after call.hangup, a few hundred ms later. On the
+      // first real run it landed 382ms behind, so a 400ms grace was luck.
+      // Stop early once cost has been seen, since nothing follows it.
+      hangupGrace = setTimeout(finished, 2500);
+    }
+    if (event.eventType === 'call.cost') {
+      if (hangupGrace) clearTimeout(hangupGrace);
+      setTimeout(finished, 150);
     }
   });
   note(`listening on :${receiver.port}`);
 
   const tunnel = await openTunnel(receiver.port, flags['webhook-url']);
   note(`webhooks to ${tunnel.url} (${tunnel.kind})`);
+
+  // call.initiated is delivered to the app's own webhook, never to the per-call
+  // override, so capturing it means borrowing the app's setting for one run.
+  let restoreApp: (() => Promise<void>) | null = null;
+  if (flags['sync-app-webhook']) {
+    const app = await getApp(apiKey, connectionId);
+    await setAppWebhook(apiKey, connectionId, app.name, tunnel.url);
+    note(`app webhook borrowed, will restore to ${app.webhookUrl ?? '(none)'}`);
+    let restored = false;
+    restoreApp = async () => {
+      if (restored) return;
+      restored = true;
+      await setAppWebhook(apiKey, connectionId, app.name, app.webhookUrl).catch((err: Error) =>
+        fail(`COULD NOT RESTORE app webhook, set it back by hand: ${err.message}`),
+      );
+      note('app webhook restored');
+    };
+    // A killed process must not leave the app pointing at a dead tunnel.
+    const onSignal = () => {
+      void restoreApp?.().then(() => process.exit(130));
+    };
+    process.once('SIGINT', onSignal);
+    process.once('SIGTERM', onSignal);
+  }
 
   let run: Run;
   try {
@@ -224,6 +261,7 @@ async function runCall(flags: Flags): Promise<number> {
     };
   } finally {
     if (callControlId) await hangup(apiKey, callControlId);
+    if (restoreApp) await restoreApp();
     tunnel.close();
     await receiver.close();
   }
@@ -251,6 +289,7 @@ async function main(): Promise<number> {
       say: { type: 'string' },
       wait: { type: 'string' },
       'ring-timeout': { type: 'string' },
+      'sync-app-webhook': { type: 'boolean' },
       svg: { type: 'string' },
       json: { type: 'string' },
       help: { type: 'boolean', short: 'h' },
