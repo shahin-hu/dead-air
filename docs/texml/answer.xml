@@ -8,6 +8,15 @@
   measurement possible. Pause holds the line long enough for the caller to take
   its readings and hang up first.
 
+  Serve it from a CDN, not from raw.githubusercontent.com. Telnyx fetches this
+  file on every single call, and under real load raw GitHub stops answering, so
+  calls ring unanswered with nothing in any log to explain it. Twenty-five
+  consecutive calls failed that way before the cause was clear. jsDelivr mirrors
+  the same file, returns application/xml rather than text/plain, and held for
+  every call:
+
+    https://cdn.jsdelivr.net/gh/<owner>/<repo>@main/docs/texml/answer.xml
+
   Used by the anchorsite comparison. Reusable by anyone who wants a number that
   picks up without a human.
 -->
