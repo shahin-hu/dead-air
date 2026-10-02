@@ -17,8 +17,7 @@ npx dead-air demo
 ```
 
 ```
-
-  dead-air +31201234567 2026-10-02T10:31:35.010Z
+  dead-air +31201234567 2026-10-02T10:45:14.384Z
 
   dial sent          ├─        0ms
   dial accepted      ├─      118ms
@@ -43,6 +42,11 @@ npx dead-air demo
   Call duration           9,980ms
   Webhook delivery lag    46ms median
   Clock skew              -12ms ±59ms
+
+  Line quality from call_quality_stats on the hangup webhook
+    inbound         MOS 4.21   loss 1.43%   jitter var 2.74   491 pkts
+    outbound        MOS 4.48   loss 0.20%   503 pkts
+    ended           normal_clearing · caller · 200
 
   First audio out. This is the moment the caller stops hearing silence.
 ```
@@ -122,9 +126,20 @@ on your side. The offset is printed as `clock skew` with an error bar of half th
 round trip. If that error bar is wider than the number you care about, you do not
 have that number. The tool says so rather than rounding the doubt away.
 
-**Not measured.** The RTP stream. This tool reads signalling and events, not
-packets. It will not give you jitter, packet loss or MOS. For those you want
-`sngrep`, Homer or VoIPmonitor, and a packet capture.
+**Read from the hangup webhook.** Telnyx puts `call_quality_stats` on
+`call.hangup`, aggregated from CHANNEL_HANGUP_COMPLETE: MOS, jitter variance and
+packet counts, per direction. Nothing extra to enable and no second API call.
+Packet loss is derived, because what you get is `skip_packet_count` against
+`packet_count`, not a percentage.
+
+I did not know this was there until I went looking in the OpenAPI spec. If you
+are already taking Telnyx webhooks, you have had MOS on every call this whole
+time.
+
+**Not measured.** Anything that needs the RTP stream itself: quality second by
+second rather than one number at the end, one-way audio detection, or the
+waveform. This tool reads signalling and events, not packets. For those you want
+`sngrep`, Homer or VoIPmonitor, and a capture.
 
 **Ring time is reported separately and excluded from the percentages.** It is
 usually the biggest number on the call and it is not a latency problem. It is a

@@ -1,4 +1,4 @@
-import type { Metrics, Point, Run, Segment } from '../timeline.js';
+import type { CallOutcome, Metrics, Point, Run, Segment } from '../timeline.js';
 
 const useColor =
   process.stdout.isTTY === true && !process.env['NO_COLOR'] && process.env['TERM'] !== 'dumb';
@@ -45,7 +45,13 @@ function padLeft(text: string, width: number): string {
   return text.length >= width ? text : ' '.repeat(width - text.length) + text;
 }
 
-export function renderWaterfall(run: Run, points: Point[], metrics: Metrics, segs: Segment[]): string {
+export function renderWaterfall(
+  run: Run,
+  points: Point[],
+  metrics: Metrics,
+  segs: Segment[],
+  outcome: CallOutcome | null,
+): string {
   const lines: string[] = [];
   const barWidth = Math.max(20, Math.min(46, (process.stdout.columns ?? 100) - 54));
   // Scale to the moment the caller hears us, not to hangup. Call duration is
@@ -112,6 +118,29 @@ export function renderWaterfall(run: Run, points: Point[], metrics: Metrics, seg
   for (const [name, value] of rows) {
     if (value === null) continue;
     lines.push(`  ${pad(name, 24)}${paint(value, C.bold)}`);
+  }
+
+  if (outcome && (outcome.quality.length > 0 || outcome.hangupCause)) {
+    lines.push('');
+    lines.push(`  ${paint('Line quality', C.bold)} ${paint('from call_quality_stats on the hangup webhook', C.dim)}`);
+    for (const q of outcome.quality) {
+      const bits = [
+        q.mos !== null ? `MOS ${q.mos.toFixed(2)}` : null,
+        q.lossPct !== null ? `loss ${q.lossPct.toFixed(2)}%` : null,
+        q.jitterMaxVariance !== null ? `jitter var ${q.jitterMaxVariance}` : null,
+        q.packetCount !== null ? `${q.packetCount.toLocaleString('en-US')} pkts` : null,
+      ].filter((bit): bit is string => bit !== null);
+      if (bits.length === 0) continue;
+      // 3.6 is the usual line where people start complaining.
+      const tone = q.mos !== null && q.mos < 3.6 ? C.yellow : C.green;
+      lines.push(`    ${pad(q.direction, 16)}${paint(bits.join('   '), tone)}`);
+    }
+    if (outcome.hangupCause) {
+      const cause = [outcome.hangupCause, outcome.hangupSource, outcome.sipHangupCause]
+        .filter((part): part is string => part !== null && part !== 'unspecified')
+        .join(' · ');
+      lines.push(`    ${pad('ended', 16)}${paint(cause, C.dim)}`);
+    }
   }
 
   if (metrics.postDialDelay === null) {

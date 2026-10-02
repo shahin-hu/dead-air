@@ -232,3 +232,73 @@ export function segments(points: Point[]): Segment[] {
   }
   return out;
 }
+
+/**
+ * Telnyx puts call quality on the hangup webhook, in `call_quality_stats`,
+ * aggregated from CHANNEL_HANGUP_COMPLETE. Most people never open it.
+ *
+ * It is per direction and every value arrives as a string. `skip_packet_count`
+ * is the loss count, so loss percent has to be derived. Fields are omitted
+ * rather than zeroed when unavailable, so everything here is optional.
+ */
+export interface DirectionQuality {
+  direction: 'inbound' | 'outbound';
+  mos: number | null;
+  jitterMaxVariance: number | null;
+  packetCount: number | null;
+  skipPacketCount: number | null;
+  lossPct: number | null;
+}
+
+export interface CallOutcome {
+  hangupCause: string | null;
+  hangupSource: string | null;
+  sipHangupCause: string | null;
+  quality: DirectionQuality[];
+}
+
+function num(value: unknown): number | null {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+  if (typeof value !== 'string' || value.trim() === '') return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function str(value: unknown): string | null {
+  return typeof value === 'string' && value !== '' ? value : null;
+}
+
+export function extractOutcome(events: RawEvent[]): CallOutcome | null {
+  const hangup = events.find((e) => e.eventType === 'call.hangup');
+  if (!hangup) return null;
+  const payload = (hangup.payload ?? {}) as Record<string, unknown>;
+  const stats = payload['call_quality_stats'] as Record<string, unknown> | null | undefined;
+
+  const quality: DirectionQuality[] = [];
+  for (const direction of ['inbound', 'outbound'] as const) {
+    const raw = stats?.[direction] as Record<string, unknown> | undefined;
+    if (!raw) continue;
+    const packetCount = num(raw['packet_count']);
+    const skipPacketCount = num(raw['skip_packet_count']);
+    // A zero packet count means the leg carried no audio, not perfect delivery.
+    const lossPct =
+      packetCount !== null && skipPacketCount !== null && packetCount > 0
+        ? (skipPacketCount / packetCount) * 100
+        : null;
+    quality.push({
+      direction,
+      mos: num(raw['mos']),
+      jitterMaxVariance: num(raw['jitter_max_variance']),
+      packetCount,
+      skipPacketCount,
+      lossPct,
+    });
+  }
+
+  return {
+    hangupCause: str(payload['hangup_cause']),
+    hangupSource: str(payload['hangup_source']),
+    sipHangupCause: str(payload['sip_hangup_cause']),
+    quality,
+  };
+}

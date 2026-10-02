@@ -1,5 +1,6 @@
 import type { Metrics, Point, Run, Segment } from '../timeline.js';
 import { scaleTo } from './terminal.js';
+import type { CallOutcome } from '../timeline.js';
 
 /**
  * The same waterfall as a standalone SVG, sized for a social post.
@@ -38,7 +39,13 @@ function ms(value: number): string {
   return `${value.toLocaleString('en-US')}ms`;
 }
 
-export function renderSvg(run: Run, points: Point[], metrics: Metrics, segs: Segment[]): string {
+export function renderSvg(
+  run: Run,
+  points: Point[],
+  metrics: Metrics,
+  segs: Segment[],
+  outcome: CallOutcome | null = null,
+): string {
   const barMax = W - PAD * 2 - LABEL_W - TIME_W;
   const scaleMax = scaleTo(points);
   const headerH = 78;
@@ -128,8 +135,13 @@ export function renderSvg(run: Run, points: Point[], metrics: Metrics, segs: Seg
     }
   }
 
+  const mosBits = (outcome?.quality ?? [])
+    .filter((q) => q.mos !== null)
+    .map((q) => `${q.direction} MOS ${q.mos?.toFixed(2)}`)
+    .join(' / ');
   const footer = [
     metrics.postDialDelay !== null ? `post-dial ${ms(metrics.postDialDelay)}` : null,
+    mosBits || null,
     metrics.medianDeliveryLag !== null ? `webhook lag ${ms(metrics.medianDeliveryLag)}` : null,
     `clock skew ${ms(run.skewMs)} ±${ms(run.skewUncertaintyMs)}`,
   ]

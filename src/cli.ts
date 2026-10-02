@@ -11,6 +11,7 @@ import {
   buildPoints,
   computeMetrics,
   estimateSkew,
+  extractOutcome,
   segments,
   type RawEvent,
   type Run,
@@ -61,12 +62,13 @@ function writeOut(run: Run, jsonPath: string | undefined): string {
   const points = buildPoints(run);
   const metrics = computeMetrics(points);
   const segs = segments(points);
-  process.stdout.write(renderWaterfall(run, points, metrics, segs));
+  const outcome = extractOutcome(run.events);
+  process.stdout.write(renderWaterfall(run, points, metrics, segs, outcome));
 
   const target = jsonPath ?? 'runs/last.json';
   try {
     mkdirSync(target.replace(/\/[^/]+$/, '') || '.', { recursive: true });
-    writeFileSync(target, JSON.stringify({ run, points, metrics, segments: segs }, null, 2));
+    writeFileSync(target, JSON.stringify({ run, points, metrics, segments: segs, outcome }, null, 2));
     note(`raw run written to ${target}`);
   } catch (err) {
     note(`could not write ${target}: ${(err as Error).message}`);
@@ -77,7 +79,10 @@ function writeOut(run: Run, jsonPath: string | undefined): string {
 function maybeSvg(run: Run, path: string | undefined): void {
   if (!path) return;
   const points = buildPoints(run);
-  writeFileSync(path, renderSvg(run, points, computeMetrics(points), segments(points)));
+  writeFileSync(
+    path,
+    renderSvg(run, points, computeMetrics(points), segments(points), extractOutcome(run.events)),
+  );
   note(`svg written to ${path}`);
 }
 
@@ -96,7 +101,27 @@ function demoRun(): Run {
     { kind: 'mark', eventType: 'mark:stt.first_partial', receivedAt: t0 + 4610 },
     { kind: 'mark', eventType: 'mark:llm.done', receivedAt: t0 + 5180 },
     { kind: 'webhook', eventType: 'call.speak.started', occurredAt: at(5402), receivedAt: t0 + 5449 },
-    { kind: 'webhook', eventType: 'call.hangup', occurredAt: at(9980), receivedAt: t0 + 10024 },
+    {
+      kind: 'webhook',
+      eventType: 'call.hangup',
+      occurredAt: at(9980),
+      receivedAt: t0 + 10024,
+      payload: {
+        hangup_cause: 'normal_clearing',
+        hangup_source: 'caller',
+        sip_hangup_cause: '200',
+        call_quality_stats: {
+          inbound: {
+            mos: '4.21',
+            jitter_max_variance: '2.74',
+            jitter_packet_count: '488',
+            packet_count: '491',
+            skip_packet_count: '7',
+          },
+          outbound: { mos: '4.48', packet_count: '503', skip_packet_count: '1' },
+        },
+      },
+    },
   ];
   return {
     startedAt: new Date(t0).toISOString(),
