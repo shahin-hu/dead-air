@@ -39,6 +39,8 @@ Options for "call"
                           per-call webhook override does NOT redirect. Without
                           it the first event you see is call.answered.
   --svg <path>            also write the waterfall as an SVG
+  --show-number           do not mask the dialled number in the SVG. The SVG is
+                          the file you post, so it is masked by default.
   --json <path>           also write the raw run               (default runs/)
 
 Marking your own pipeline
@@ -58,6 +60,7 @@ interface Flags {
   wait?: string;
   'ring-timeout'?: string;
   'sync-app-webhook'?: boolean;
+  'show-number'?: boolean;
   svg?: string;
   json?: string;
   help?: boolean;
@@ -81,12 +84,19 @@ function writeOut(run: Run, jsonPath: string | undefined): string {
   return target;
 }
 
-function maybeSvg(run: Run, path: string | undefined): void {
+function maybeSvg(run: Run, path: string | undefined, showNumber = false): void {
   if (!path) return;
   const points = buildPoints(run);
   writeFileSync(
     path,
-    renderSvg(run, points, computeMetrics(points), segments(points), extractOutcome(run.events)),
+    renderSvg(
+      run,
+      points,
+      computeMetrics(points),
+      segments(points),
+      extractOutcome(run.events),
+      showNumber,
+    ),
   );
   note(`svg written to ${path}`);
 }
@@ -272,7 +282,7 @@ async function runCall(flags: Flags): Promise<number> {
   }
 
   writeOut(run, flags.json);
-  maybeSvg(run, flags.svg);
+  maybeSvg(run, flags.svg, flags['show-number']);
   return 0;
 }
 
@@ -290,6 +300,7 @@ async function main(): Promise<number> {
       wait: { type: 'string' },
       'ring-timeout': { type: 'string' },
       'sync-app-webhook': { type: 'boolean' },
+      'show-number': { type: 'boolean' },
       svg: { type: 'string' },
       json: { type: 'string' },
       help: { type: 'boolean', short: 'h' },
@@ -306,7 +317,7 @@ async function main(): Promise<number> {
   if (command === 'demo') {
     const run = demoRun();
     writeOut(run, flags.json ?? 'runs/demo.json');
-    maybeSvg(run, flags.svg);
+    maybeSvg(run, flags.svg, flags['show-number']);
     return 0;
   }
 
@@ -318,7 +329,7 @@ async function main(): Promise<number> {
     }
     const saved = JSON.parse(readFileSync(path, 'utf8')) as { run: Run };
     writeOut(saved.run, undefined);
-    maybeSvg(saved.run, flags.svg);
+    maybeSvg(saved.run, flags.svg, flags['show-number']);
     return 0;
   }
 

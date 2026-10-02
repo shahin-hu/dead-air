@@ -27,6 +27,19 @@ const INK = {
   other: '#8b949e',
 };
 
+/**
+ * The SVG is the artefact people post. A personal number in the corner of a
+ * screenshot is a footgun, so it is masked here by default and left intact in
+ * the terminal, which nobody shares. `--show-number` opts back in.
+ */
+export function maskNumber(value: string): string {
+  const digits = value.replace(/[^0-9]/g, '');
+  if (digits.length < 7) return value;
+  const head = digits.slice(0, 3);
+  const tail = digits.slice(-2);
+  return `+${head}${'\u2022'.repeat(digits.length - 5)}${tail}`;
+}
+
 function esc(text: string): string {
   return text
     .replace(/&/g, '&amp;')
@@ -45,6 +58,7 @@ export function renderSvg(
   metrics: Metrics,
   segs: Segment[],
   outcome: CallOutcome | null = null,
+  showNumber = false,
 ): string {
   const barMax = W - PAD * 2 - LABEL_W - TIME_W;
   const axis = buildAxis(points);
@@ -64,7 +78,7 @@ export function renderSvg(
     `<text x="${PAD}" y="42" fill="${INK.text}" font-size="21" font-weight="700">dead-air</text>`,
   );
   out.push(
-    `<text x="${PAD + 128}" y="42" fill="${INK.dim}" font-size="14">${esc(run.call.to ?? '')}</text>`,
+    `<text x="${PAD + 128}" y="42" fill="${INK.dim}" font-size="14">${esc(showNumber ? (run.call.to ?? '') : maskNumber(run.call.to ?? ''))}</text>`,
   );
   const headline =
     metrics.answerToFirstAudio !== null
