@@ -1,6 +1,6 @@
 {
   "name": "dialtrace",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Measure the silence in your voice AI phone calls. Zero dependencies.",
   "keywords": [
     "voice-ai",

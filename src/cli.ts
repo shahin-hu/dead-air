@@ -118,8 +118,8 @@ function demoRun(): Run {
     {
       kind: 'webhook',
       eventType: 'call.hangup',
-      occurredAt: at(9980),
-      receivedAt: t0 + 10024,
+      occurredAt: at(7000),
+      receivedAt: t0 + 7044,
       payload: {
         hangup_cause: 'normal_clearing',
         hangup_source: 'caller',

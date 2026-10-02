@@ -24,19 +24,18 @@ npx dialtrace demo
 ```
 
 ```
-  dialtrace +31201234567 2026-10-02T13:38:35.027Z
+  dialtrace +31201234567 2026-10-02T13:48:21.133Z
 
   dial sent          ├─        0ms
-  dial accepted      ├───      118ms
-  call.initiated     ├───      121ms
-  call.answered      ├────╳─    3,910ms  ← setup and ring, not separable here
-  streaming.started  ├────╳────    4,024ms
-  stt.first_partial  ├────╳──────────────────    4,610ms ·
-  llm.done           ├────╳─────────────────────────────────    5,180ms ·
-  speak.started      ├────╳──────────────────────────────────────    5,402ms  ← caller hears you
-  call.hangup        ├────╳────────────────────────────────────────╳    9,980ms
+  dial accepted      ├──      118ms
+  call.initiated     ├──      121ms
+  call.answered      ├───╳─    3,910ms  ← setup and ring, not separable here
+  streaming.started  ├───╳──    4,024ms
+  stt.first_partial  ├───╳──────────    4,610ms ·
+  llm.done           ├───╳──────────────────    5,180ms ·
+  speak.started      ├───╳─────────────────────    5,402ms  ← caller hears you
+  call.hangup        ├───╳──────────────────────────────────────────    7,000ms
                      ╳ = 3,789ms of waiting, not drawn to scale
-                     ╳ = 4,578ms of waiting, not drawn to scale
 
   Where the time went
     api round trip      121ms    8%  ██
@@ -45,7 +44,7 @@ npx dialtrace demo
     your pipeline     1,378ms   85%  ████████████████████████
 
   Answer to first audio   1,492ms
-  Call duration           9,980ms
+  Call duration           7,000ms
   Webhook delivery lag    44ms median
   Clock skew              -12ms ±59ms
 
