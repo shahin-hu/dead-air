@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  A measurement target that answers instantly and then says nothing.
+
+  Point a TeXML Application's Voice URL at this file and assign a number to it.
+  Calls to that number are answered the moment TeXML is fetched, with no server
+  to run and no tunnel to keep alive, which is what makes repeated unattended
+  measurement possible. Pause holds the line long enough for the caller to take
+  its readings and hang up first.
+
+  Used by the anchorsite comparison. Reusable by anyone who wants a number that
+  picks up without a human.
+-->
+<Response>
+  <Pause length="20"/>
+</Response>
